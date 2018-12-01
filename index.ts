@@ -60,7 +60,7 @@ export type PhotoSource = {
   sizeLabel: string;
 };
 
-export default async function getPhotos(
+export async function getPhotoSet(
   apiKey: string,
   setId: string
 ): Promise<Array<Photo>> {
