@@ -1,0 +1,17 @@
+{
+  "name": "@mattb/flickr-api",
+  "version": "1.0.0",
+  "description": "Code to call flickr",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "Matt Benton <m@mattb.tech>",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@types/request-promise": "^4.1.42",
+    "request-promise": "^4.2.2",
+    "typescript": "^3.2.1"
+  }
+}

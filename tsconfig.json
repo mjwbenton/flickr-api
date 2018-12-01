@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES2016",
+    "strict": true,
+    "esModuleInterop": true,
+    "declaration": true
+  },
+  "compileOnSave": true
+}
