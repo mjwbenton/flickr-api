@@ -32,14 +32,13 @@ async function callFlickr(
   });
   url += paramsStr;
   try {
-    const resultStrPromise = request(url);
-    return resultStrPromise.then((str: string) => {
-      return JSON.parse(str);
-    });
+    const resultStr = await request(url);
+    return JSON.parse(resultStr);
   } catch (err) {
     if (retryNumber < 2) {
       return callFlickr(apiKey, methodName, params, retryNumber + 1);
     }
+    console.error(`Error calling flickr url: ${url}\n${err}`);
     throw err;
   }
 }
