@@ -9,6 +9,7 @@
   },
   "author": "Matt Benton <m@mattb.tech>",
   "license": "MIT",
+  "repository": "mjwbenton/flickr-api",
   "dependencies": {
     "@types/request-promise": "^4.1.42",
     "request": "^2.88.0",
