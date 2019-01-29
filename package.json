@@ -1,11 +1,12 @@
 {
-  "name": "@mattb/flickr-api",
+  "name": "@mattb.tech/flickr-api",
   "version": "1.0.0",
   "description": "Code to call flickr",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepare" : "npm run build"
   },
   "author": "Matt Benton <m@mattb.tech>",
   "license": "MIT",
@@ -15,5 +16,6 @@
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
     "typescript": "^3.2.1"
-  }
+  },
+  "files": ["index.js", "index.d.ts"]
 }
