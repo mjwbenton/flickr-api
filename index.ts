@@ -4,11 +4,6 @@ const FLICKR_URL_BASE = "https://www.flickr.com/photos/";
 const FLICKR_API_BASE_URL = "https://api.flickr.com/services/rest/";
 const FLICKR_BASE_PARAMETERS = "?format=json&nojsoncallback=1";
 
-const FLICKR_PHOTOS_METHOD = "flickr.photosets.getPhotos";
-const FLICKR_SIZES_METHOD = "flickr.photos.getSizes";
-const PHOTO_ID_KEY = "photo_id";
-const PHOTOSET_ID_KEY = "photoset_id";
-
 const WANTED_IMAGE_SIZES = new Set([
   "Medium",
   "Medium 640",
@@ -62,23 +57,20 @@ export async function getPhotoSet(
   apiKey: string,
   setId: string
 ): Promise<Array<Photo>> {
-  const photosResponse = await callFlickr(apiKey, FLICKR_PHOTOS_METHOD, {
-    [PHOTOSET_ID_KEY]: setId
-  });
+  const photosResponse = await callFlickr(
+    apiKey,
+    "flickr.photosets.getPhotos",
+    {
+      photoset_id: setId
+    }
+  );
   const owner = photosResponse.photoset.owner;
   const promises: Promise<Photo>[] = photosResponse.photoset.photo.map(
     async (p: any) => {
-      const sizes = await callFlickr(apiKey, FLICKR_SIZES_METHOD, {
-        [PHOTO_ID_KEY]: p.id
+      const sizes = await callFlickr(apiKey, "flickr.photos.getSizes", {
+        photo_id: p.id
       });
-      const photoSources: PhotoSource[] = sizes.sizes.size
-        .filter((el: any) => WANTED_IMAGE_SIZES.has(el.label))
-        .map((el: any) => ({
-          url: el.source,
-          width: parseInt(el.width),
-          height: parseInt(el.height)
-        }))
-        .sort((a: PhotoSource, b: PhotoSource) => b.width - a.width);
+      const photoSources = buildSizesSources(sizes);
       const mainSource = photoSources[photoSources.length - 1];
       return {
         id: p.id,
@@ -111,6 +103,42 @@ export async function getRecentPhotos(
     },
     sources: buildRecentSources(p)
   }));
+}
+
+export async function getPhoto(
+  apiKey: string,
+  photo_id: string
+): Promise<Photo> {
+  const [infoResponse, sizesResponse] = await Promise.all([
+    callFlickr(apiKey, "flickr.photos.getInfo", {
+      photo_id
+    }),
+    callFlickr(apiKey, "flickr.photos.getSizes", {
+      photo_id
+    })
+  ]);
+  const sources = buildSizesSources(sizesResponse);
+  const mainSource = sources[sources.length - 1];
+  return {
+    id: photo_id,
+    title: infoResponse.photo.title._content,
+    pageUrl: infoResponse.photo.urls.url.filter(
+      (url: any) => url.type === "photopage"
+    )[0]._content,
+    sources,
+    mainSource
+  };
+}
+
+function buildSizesSources(sizesResponse: any): PhotoSource[] {
+  return sizesResponse.sizes.size
+    .filter((el: any) => WANTED_IMAGE_SIZES.has(el.label))
+    .map((el: any) => ({
+      url: el.source,
+      width: parseInt(el.width),
+      height: parseInt(el.height)
+    }))
+    .sort((a: PhotoSource, b: PhotoSource) => b.width - a.width);
 }
 
 function buildRecentSources(photoResponse: any): PhotoSource[] {
