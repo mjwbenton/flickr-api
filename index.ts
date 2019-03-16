@@ -94,6 +94,7 @@ export async function getRecentPhotos(
     per_page: "50"
   });
   return response.photos.photo.map((p: any) => ({
+    id: p.id,
     pageUrl: `${FLICKR_URL_BASE}${p.owner}/${p.id}/`,
     title: p.title,
     mainSource: {
