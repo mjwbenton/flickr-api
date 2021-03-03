@@ -6,16 +6,19 @@
   "types": "index.d.ts",
   "scripts": {
     "build": "tsc",
-    "prepare" : "npm run build"
+    "prepare": "npm run build"
   },
   "author": "Matt Benton <m@mattb.tech>",
   "license": "MIT",
   "repository": "mjwbenton/flickr-api",
-  "dependencies": {
-    "@types/request-promise": "^4.1.42",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.2",
+  "devDependencies": {
     "typescript": "^3.2.1"
   },
-  "files": ["index.js", "index.d.ts"]
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "dependencies": {
+    "axios": "^0.21.1"
+  }
 }

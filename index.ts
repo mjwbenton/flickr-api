@@ -1,4 +1,4 @@
-import request from "request-promise";
+import axios from "axios";
 
 const FLICKR_URL_BASE = "https://www.flickr.com/photos/";
 const FLICKR_API_BASE_URL = "https://api.flickr.com/services/rest/";
@@ -10,7 +10,7 @@ const WANTED_IMAGE_SIZES = new Set([
   "Medium 800",
   "Large",
   "Large 1600",
-  "Large 2048"
+  "Large 2048",
 ]);
 
 async function callFlickr(
@@ -22,14 +22,14 @@ async function callFlickr(
   let url =
     FLICKR_API_BASE_URL + FLICKR_BASE_PARAMETERS + `&api_key=${apiKey}&`;
   let paramsStr = `method=${methodName}`;
-  Object.keys(params).forEach(key => {
+  Object.keys(params).forEach((key) => {
     const value = params[key];
     paramsStr += `&${key}=${value}`;
   });
   url += paramsStr;
   try {
-    const resultStr = await request(url);
-    return JSON.parse(resultStr);
+    const result = await axios.get(url);
+    return result.data;
   } catch (err) {
     if (retryNumber < 2) {
       return callFlickr(apiKey, methodName, params, retryNumber + 1);
@@ -61,14 +61,14 @@ export async function getPhotoSet(
     apiKey,
     "flickr.photosets.getPhotos",
     {
-      photoset_id: setId
+      photoset_id: setId,
     }
   );
   const owner = photosResponse.photoset.owner;
   const promises: Promise<Photo>[] = photosResponse.photoset.photo.map(
     async (p: any) => {
       const sizes = await callFlickr(apiKey, "flickr.photos.getSizes", {
-        photo_id: p.id
+        photo_id: p.id,
       });
       const photoSources = buildSizesSources(sizes);
       const mainSource = photoSources[photoSources.length - 1];
@@ -77,7 +77,7 @@ export async function getPhotoSet(
         title: p.title,
         pageUrl: `${FLICKR_URL_BASE}${owner}/${p.id}/`,
         sources: photoSources,
-        mainSource: mainSource
+        mainSource: mainSource,
       };
     }
   );
@@ -91,7 +91,7 @@ export async function getRecentPhotos(
   const response = await callFlickr(apiKey, "flickr.people.getPublicPhotos", {
     user_id,
     extras: "url_z, url_c, url_l, url_k",
-    per_page: "50"
+    per_page: "50",
   });
   return response.photos.photo.map((p: any) => ({
     id: p.id,
@@ -100,9 +100,9 @@ export async function getRecentPhotos(
     mainSource: {
       url: p.url_c,
       height: p.height_c,
-      width: p.width_c
+      width: p.width_c,
     },
-    sources: buildRecentSources(p)
+    sources: buildRecentSources(p),
   }));
 }
 
@@ -112,11 +112,11 @@ export async function getPhoto(
 ): Promise<Photo> {
   const [infoResponse, sizesResponse] = await Promise.all([
     callFlickr(apiKey, "flickr.photos.getInfo", {
-      photo_id
+      photo_id,
     }),
     callFlickr(apiKey, "flickr.photos.getSizes", {
-      photo_id
-    })
+      photo_id,
+    }),
   ]);
   const sources = buildSizesSources(sizesResponse);
   const mainSource = sources[sources.length - 1];
@@ -127,7 +127,7 @@ export async function getPhoto(
       (url: any) => url.type === "photopage"
     )[0]._content,
     sources,
-    mainSource
+    mainSource,
   };
 }
 
@@ -137,20 +137,20 @@ function buildSizesSources(sizesResponse: any): PhotoSource[] {
     .map((el: any) => ({
       url: el.source,
       width: parseInt(el.width),
-      height: parseInt(el.height)
+      height: parseInt(el.height),
     }))
     .sort((a: PhotoSource, b: PhotoSource) => b.width - a.width);
 }
 
 function buildRecentSources(photoResponse: any): PhotoSource[] {
   const result: PhotoSource[] = [];
-  Object.keys(photoResponse).forEach(key => {
+  Object.keys(photoResponse).forEach((key) => {
     if (key.startsWith("url_")) {
       const sizeKey = key.replace("url_", "");
       result.push({
         url: photoResponse[key],
         height: photoResponse[`height_${sizeKey}`],
-        width: photoResponse[`width_${sizeKey}`]
+        width: photoResponse[`width_${sizeKey}`],
       });
     }
   });
