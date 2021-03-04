@@ -86,6 +86,31 @@ export async function getPhotoSet(
   return await Promise.all(promises);
 }
 
+export async function getUserPhotosWithTag(
+  apiKey: string,
+  user_id: string,
+  tag: string
+): Promise<Photo[]> {
+  const response = await callFlickr(apiKey, "flickr.photos.search", {
+    user_id,
+    tags: tag,
+    extras: "url_z, url_c, url_l, url_k",
+    per_page: "50",
+  });
+  return response.photos.photo.map((p: any) => ({
+    id: p.id,
+    userId: user_id,
+    pageUrl: `${FLICKR_URL_BASE}${p.owner}/${p.id}/`,
+    title: p.title,
+    mainSource: {
+      url: p.url_c,
+      height: p.height_c,
+      width: p.width_c,
+    },
+    sources: buildRecentSources(p),
+  }));
+}
+
 export async function getRecentPhotos(
   apiKey: string,
   user_id: string
