@@ -41,6 +41,7 @@ async function callFlickr(
 
 export type Photo = {
   id: string;
+  userId: string;
   pageUrl: string;
   title: string;
   mainSource: PhotoSource;
@@ -74,6 +75,7 @@ export async function getPhotoSet(
       const mainSource = photoSources[photoSources.length - 1];
       return {
         id: p.id,
+        userId: owner,
         title: p.title,
         pageUrl: `${FLICKR_URL_BASE}${owner}/${p.id}/`,
         sources: photoSources,
@@ -95,6 +97,7 @@ export async function getRecentPhotos(
   });
   return response.photos.photo.map((p: any) => ({
     id: p.id,
+    userId: user_id,
     pageUrl: `${FLICKR_URL_BASE}${p.owner}/${p.id}/`,
     title: p.title,
     mainSource: {
@@ -122,6 +125,7 @@ export async function getPhoto(
   const mainSource = sources[sources.length - 1];
   return {
     id: photo_id,
+    userId: infoResponse.photo.owner.nsid,
     title: infoResponse.photo.title._content,
     pageUrl: infoResponse.photo.urls.url.filter(
       (url: any) => url.type === "photopage"
